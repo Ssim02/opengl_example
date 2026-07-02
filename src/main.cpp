@@ -1,3 +1,5 @@
+#include "common.h"
+#include "shader.h"
 #include <spdlog/spdlog.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -56,6 +58,11 @@ int main(int argc, const char** argv) {
     }
     auto glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
     SPDLOG_INFO("OpenGL context version: {}", glVersion);
+
+    auto vertexShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
+    auto fragmentShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
+    SPDLOG_INFO("vertext shader id: {}", vertexShader->Get());
+    SPDLOG_INFO("fragment shader id: {}", fragmentShader->Get());
 
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT); // 윈도우 최초 생성 시에는 프레임 버퍼 변경 이벤트가 발생하지 않으므로 수동 삽입
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);

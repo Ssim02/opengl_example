@@ -1,0 +1,29 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "MSVC x64 (Visual Studio 2022)",
+            "generator": "Visual Studio 17 2022",
+            "architecture": "x64",
+            "toolset": "host=x64",
+            "binaryDir": "${sourceDir}/build",
+            "environment": {
+                "SSL_CERT_FILE": "C:/msys64/ucrt64/lib/python3.12/site-packages/certifi/cacert.pem",
+                "SSL_CERT_DIR": "C:/msys64/ucrt64/lib/python3.12/site-packages/certifi"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default",
+            "configuration": "Debug"
+        }
+    ]
+}
