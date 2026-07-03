@@ -1,5 +1,5 @@
-#include "common.h"
-#include "shader.h"
+#include "context.h"
+
 #include <spdlog/spdlog.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -59,10 +59,20 @@ int main(int argc, const char** argv) {
     auto glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
     SPDLOG_INFO("OpenGL context version: {}", glVersion);
 
-    auto vertexShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
-    auto fragmentShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
-    SPDLOG_INFO("vertext shader id: {}", vertexShader->Get());
-    SPDLOG_INFO("fragment shader id: {}", fragmentShader->Get());
+    auto context = Context::Create();
+    if (!context) {
+        SPDLOG_ERROR("failed to create context");
+        glfwTerminate();
+        return -1;
+    }
+
+    ShaderPtr vertShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
+    ShaderPtr fragShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
+    SPDLOG_INFO("vertext shader id: {}", vertShader->Get());
+    SPDLOG_INFO("fragment shader id: {}", fragShader->Get());
+
+    auto program = Program::Create({fragShader, vertShader});
+    SPDLOG_INFO("program id: {}", program->Get());
 
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT); // 윈도우 최초 생성 시에는 프레임 버퍼 변경 이벤트가 발생하지 않으므로 수동 삽입
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
@@ -72,10 +82,13 @@ int main(int argc, const char** argv) {
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents(); // 윈도우와 관련한 여러 이벤트들을 수집하는 함수(창 크기가 늘어나던가 하는 등의 이벤트). 이거 없으면 너무 빨리 갱신되어서 멈춰있는것처럼 보일 것
-        glClearColor(0.0f, 0.1f, 0.2f, 0.0f); // 색상 지정
-        glClear(GL_COLOR_BUFFER_BIT); // 색상이 들어갈 화면을 지운다
+        context->Render();
         glfwSwapBuffers(window);
     }
+    context.reset(); // context = nullptr; 이 시점에서 context가 들고 있던 메모리를 해제, 안전하게 메모리 해제되면서 openGL object들도 gpu 메모리에서 날아가게 될 것. 
+
+    // 여기서 shader등 메모리가 한꺼번에 정리되는 것이 좋음. 
+    // 이걸 한꺼번에 묶어서 하기 위해 context에서 관리할 것.
 
     glfwTerminate();
     return 0;
